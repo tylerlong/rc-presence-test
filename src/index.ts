@@ -9,8 +9,16 @@ const rc = new RingCentral({
 
 const main = async () => {
   await rc.authorize({jwt: process.env.RINGCENTRAL_JWT_TOKEN!});
-  const extInfo = await rc.restapi().account().extension().get();
-  console.log(JSON.stringify(extInfo, null, 2));
+  const pubNubExtension = new PubNubExtension();
+  await rc.installExtension(pubNubExtension);
+  await pubNubExtension.subscribe(
+    [
+      '/restapi/v1.0/account/~/extension/~/presence?detailedTelephonyState=true',
+    ],
+    event => {
+      console.log(JSON.stringify(event, null, 2));
+    }
+  );
 };
 
 main();
